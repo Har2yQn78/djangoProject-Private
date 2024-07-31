@@ -2,9 +2,6 @@
 <form action="." method="POST" hx-post="." hx-swap="outerHTML">
             {% csrf_token %}
 
-            {% if message %}
-            <p>{{ message }}</p>
-            {% endif %}
             {% for field in form %}
                 <div class="{% if field.field.required  %}{{ forms.required_css_class }}{% endif %}">
                     {{ field.errors}}
@@ -32,5 +29,10 @@
 
 
             {% endif %}
-            <button style="margin-top:10px;" type="submit" >Save</button>
+            <div class="htmx-indicator">Loading...</div>
+            <button class="htmx-inverted-indicator" style="margin-top:10px;" type="submit" >Save</button>
+
+            {% if message %}
+            <p>{{ message }}</p>
+            {% endif %}
         </form>
