@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+    <style>
+        .ingredient-form{
+            border-bottom: 1px solid black;
+        }
+        .hidden{
+            display: none
+        }
+
+    </style>
+
+        <div style="margin-top:30px;">
+        {% include 'recipes/partials/forms.html' %}
+    </div>
+
+    <script>
+
+        const addMoreBtn = document.getElementById('add-more')
+        const totalNewForm = document.getElementById('id_form-TOTAL-FORMS')
+        addMoreBtn.addEventListener('click', add_new_form)
+
+        function add_new_form(event){
+            if (event) {
+                event.preventDefault()
+            }
+            const currentIngredientForm = document.getElementsByClassName('ingredient-form')
+            const currentFormCount = currentIngredientForm.length // + 1
+            const formCopyTarget = document.getElementById('ingredient-form-list')
+            const copyEmptyFormEL = document.getElementById('empty-form').cloneNode(true)
+            copyEmptyFormEL.setAttribute('class', 'ingredient-form')
+            copyEmptyFormEL.setAttribute('id', `form-${currentFormCount}`)
+            const regex = new RegExp('__prefix__', 'g')
+            copyEmptyFormEL.innerHTML = copyEmptyFormEL.innerHTML.replace(regex, currentFormCount)
+            totalNewForm.setAttribute('value', currentFormCount + 1)
+            formCopyTarget.append(copyEmptyFormEL)
+        }
+
+
+    </script>
+
+{% endblock content %}

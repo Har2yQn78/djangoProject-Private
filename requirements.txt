@@ -1,0 +1,10 @@
+django  #these 3 are always needed
+gunicorn   #these 3 are always needed
+psycopg2-binary   #these 3 are always needed
+django-htmx
+pint
+django-storages
+boto3
+pillow
+requests
+django-dotenv

@@ -1,0 +1,102 @@
+[
+{
+    "model": "recipes.recipe",
+    "pk": 1,
+    "fields": {
+        "user": 1,
+        "name": "egg",
+        "description": "this is the description(the only thing I can cook)",
+        "directions": "my directions",
+        "timestamp": "2024-07-21T14:19:01.720Z",
+        "updated": "2024-07-26T11:48:15.765Z",
+        "active": true
+    }
+},
+{
+    "model": "recipes.recipe",
+    "pk": 2,
+    "fields": {
+        "user": 1,
+        "name": "Pasta",
+        "description": "pasta desc",
+        "directions": "pasta dire",
+        "timestamp": "2024-07-25T12:16:48.076Z",
+        "updated": "2024-07-25T12:16:48.076Z",
+        "active": true
+    }
+},
+{
+    "model": "recipes.recipe",
+    "pk": 3,
+    "fields": {
+        "user": 1,
+        "name": "egg HTMX",
+        "description": "we",
+        "directions": "qwew",
+        "timestamp": "2024-07-28T11:35:51.538Z",
+        "updated": "2024-07-28T11:35:51.538Z",
+        "active": true
+    }
+},
+{
+    "model": "recipes.recipe",
+    "pk": 4,
+    "fields": {
+        "user": 1,
+        "name": "something",
+        "description": "something des",
+        "directions": "something dire",
+        "timestamp": "2024-07-31T09:48:17.205Z",
+        "updated": "2024-07-31T09:48:17.205Z",
+        "active": true
+    }
+},
+{
+    "model": "recipes.recipeingredient",
+    "pk": 1,
+    "fields": {
+        "recipe": 1,
+        "name": "Eqq",
+        "description": null,
+        "quantity": "78",
+        "quantity_as_float": 78.0,
+        "unit": "gram",
+        "directions": null,
+        "timestamp": "2024-07-23T11:02:30.019Z",
+        "updated": "2024-07-26T11:48:15.779Z",
+        "active": true
+    }
+},
+{
+    "model": "recipes.recipeingredient",
+    "pk": 2,
+    "fields": {
+        "recipe": 1,
+        "name": "123",
+        "description": null,
+        "quantity": "123d",
+        "quantity_as_float": null,
+        "unit": "gram",
+        "directions": null,
+        "timestamp": "2024-07-25T12:05:07.693Z",
+        "updated": "2024-07-26T11:48:15.787Z",
+        "active": true
+    }
+},
+{
+    "model": "recipes.recipeingredient",
+    "pk": 3,
+    "fields": {
+        "recipe": 1,
+        "name": "egg",
+        "description": null,
+        "quantity": "1",
+        "quantity_as_float": 1.0,
+        "unit": "gram",
+        "directions": null,
+        "timestamp": "2024-07-25T12:17:21.286Z",
+        "updated": "2024-07-26T11:48:15.795Z",
+        "active": true
+    }
+}
+]
