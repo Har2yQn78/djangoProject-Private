@@ -1,9 +1,30 @@
+import pint
 from django.conf import settings
 from django.db import models
 from .utils import number_str_to_float
 from .validators import validate_unit_of_measure
-import pint
 from django.urls import reverse
+from django.db.models import Q
+
+
+class RecipeQuerySet(models.QuerySet):
+    def search(self, query=None):
+        if query is None or query == "":
+            return self.none()
+        lookup = (
+                Q(name__icontains=query) |
+                Q(description__icontains=query) |
+                Q(directions__icontains=query)
+        )
+        return self.filter(lookup)
+
+
+class RecipeManager(models.Manager):
+    def get_queryset(self):
+        return RecipeQuerySet(self.model, using=self._db)
+
+    def search(self, query=None):
+        return self.get_queryset().search(query=query)
 
 
 class Recipe(models.Model):
@@ -14,6 +35,12 @@ class Recipe(models.Model):
     timestamp = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
     active = models.BooleanField(default=True)
+
+    object = RecipeManager()
+
+    @property
+    def title(self):
+        return self.name
 
     def get_absolute_url(self):
         return reverse("recipes:detail", kwargs={"id": self.id})

@@ -1,0 +1,8 @@
+Search for {{ request.GET.q }} under {{ request.GET.type|title }}s
+{% for object in quesryset %}
+    <li><a href="{{ object.get_absolute_url }}">{{ object.name }}</a></li>
+
+    {% empty %}
+    <li>No Result Found</li>
+
+{% endfor %}
