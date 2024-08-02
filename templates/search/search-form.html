@@ -1,13 +1,7 @@
 <div>
 <form action="/search/" method="GET">
 
-
-            <input type="text" id="search-query" name="q" value="{{ request.GET.q }}" hx-get="/search/"
-                   hx-trigger="Keyup changed delay ms:200ms" hx-include="#search-type" hx-target="typeahead-results"/>
-
-            <select name="type" id="search-type" hx-get="/search/"
-                   hx-trigger="Keyup changed delay ms:200ms"
-                    hx-include="#search-query" hx-target="typeahead-results">
+                  <select name="type" id="search-type">
 
                 {% if request.GET.type == 'article' %}
                     <option value="article" selected>Articles</option>
@@ -21,6 +15,11 @@
                     <option value="recipe">Recipes</option>
                 {% endif %}
             </select>
+
+            <input type="text" id="search-query" name="q" value="{{ request.GET.q }}" hx-get="/search/"
+                   hx-trigger="Keyup changed delay ms:200ms" hx-include="#search-type" hx-target="typeahead-results"/>
+
+
 
         <input type="submit"/>
 

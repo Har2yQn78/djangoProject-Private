@@ -22,5 +22,6 @@ def search_view(request):
     }
     template = "search/result-view.html"
     if request.htmx:
+        context['queryset'] = qs[:5]
         template = "search/partials/result.html"
     return render(request, template, context)
