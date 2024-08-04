@@ -12,7 +12,7 @@ from django.urls import reverse
 
 @login_required
 def recipe_list_view(request):
-    qs = Recipe.objects.filter(user=request.user)
+    qs = Recipe.object.filter(user=request.user)
     context = {
         "object_list": qs
     }
@@ -29,9 +29,35 @@ def recipe_detail_view(request, id=None):
 
 
 @login_required
+def recipe_delete_view(request, id=None):
+    obj = get_object_or_404(Recipe, id=id, user=request.user)
+    if request.method == "POST":
+        obj.delete()
+        success_url = reverse('recipes:list')
+        return redirect(success_url)
+    context = {
+        "object": obj
+    }
+    return render(request, "recipes/delete.html", context)
+
+
+@login_required
+def recipe_ingredient_delete_view(request, parent_id=None, id=None):
+    obj = get_object_or_404(RecipeIngredient, recipe__id=parent_id,  id=id, recipe__user=request.user)
+    if request.method == "POST":
+        obj.delete()
+        success_url = reverse('recipes:detail', kwargs={"id": parent_id})
+        return redirect(success_url)
+    context = {
+        "object": obj
+    }
+    return render(request, "recipes/delete.html", context)
+
+
+@login_required
 def recipe_detail_hx_view(request, id=None):
     try:
-        obj = Recipe.objects.get(id=id, user=request.user)
+        obj = Recipe.object.get(id=id, user=request.user)
     except:
         obj = None
     if obj is None:
@@ -90,7 +116,7 @@ def recipe_ingredient_update_hx_view(request, parent_id=None, id=None):
     if not request.htmx:
         raise Http404
     try:
-        parent_obj = Recipe.objects.get(id=parent_id, user=request.user)
+        parent_obj = Recipe.object.get(id=parent_id, user=request.user)
     except:
         parent_obj = None
     if parent_obj is None:
@@ -99,11 +125,11 @@ def recipe_ingredient_update_hx_view(request, parent_id=None, id=None):
     instance = None
     if id is not None:
         try:
-            instance = RecipeIngredient.objects.get(recpie=parent_obj, id=id)
+            instance = RecipeIngredient.object.get(recpie=parent_obj, id=id)
         except:
             instance = None
     form = RecipeIngredientForm(request.POST or None, instance=instance)
-    url = reverse("recipes:hx-ingredient-create",kwargs={"parent_id": parent_obj.id})
+    url = reverse("recipes:hx-ingredient-create", kwargs={"parent_id": parent_obj.id})
     if instance:
         url = instance.get_hx_edit_url()
     context = {
@@ -120,5 +146,3 @@ def recipe_ingredient_update_hx_view(request, parent_id=None, id=None):
         return render(request, "recipes/partials/ingredient-inline.html", context)
 
     return render(request, "recipes/partials/ingredient-form.html", context)
-
-
