@@ -2,7 +2,7 @@ from django.contrib import admin
 
 # Register your models here.
 
-from .models import Article
+from .models import Article, ArticleImage
 
 
 class ArticleAdmin(admin.ModelAdmin):
@@ -11,3 +11,5 @@ class ArticleAdmin(admin.ModelAdmin):
 
 
 admin.site.register(Article, ArticleAdmin)
+
+admin.site.register(ArticleImage)

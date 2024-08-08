@@ -155,6 +155,10 @@ STATICFIELS_DIRS = [
 
 STATIC_ROOT = BASE_DIR / "staticfiles-cdn"
 
+MEDIA_ROOT = BASE_DIR / "staticfiles-cdn" / "uploads"
+
+# from .cdn.conf import *
+
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
 

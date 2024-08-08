@@ -1,3 +1,5 @@
+import pathlib
+import uuid
 from django.conf import settings
 from django.db import models
 from django.db.models import Q
@@ -26,6 +28,7 @@ class ArticleManager(models.Manager):
 
     def search(self, query=None):
         return self.get_queryset().search(query=query)
+
 
 
 class Article(models.Model):
@@ -71,3 +74,15 @@ def article_post_save(sender, instance, created, *args, **kwargs):
 
 
 post_save.connect(article_post_save, sender=Article)
+
+
+def article_image_upload_handler(instance, filename):
+    fpath = pathlib.Path(filename)
+    new_fname = str(uuid.uuid1())  # uuid1 -> uuid + timestamp
+    return f"articles/{new_fname}{fpath.suffix}"  # suffix -> .png/.jpg/.jpeg
+
+
+class ArticleImage(models.Model):
+    recipe = models.ForeignKey(Article, on_delete=models.CASCADE)
+    image = models.ImageField(upload_to=article_image_upload_handler)  # path/to/location/of/image
+

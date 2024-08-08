@@ -1,4 +1,6 @@
+import pathlib
 import pint
+import uuid
 from django.conf import settings
 from django.db import models
 from .utils import number_str_to_float
@@ -56,6 +58,17 @@ class Recipe(models.Model):
 
     def get_ingredient_children(self):
         return self.recipeingredient_set.all()
+
+
+def recipe_ingredient_image_upload_handler(instance, filename):
+    fpath = pathlib.Path(filename)
+    new_fname = str(uuid.uuid1())  # uuid1 -> uuid + timestamp
+    return f"recipes/{new_fname}{fpath.suffix}"  # suffix -> .png/.jpg/.jpeg
+
+
+class RecipeIngredientImage(models.Model):
+    recipe = models.ForeignKey(Recipe, on_delete=models.CASCADE)
+    image = models.ImageField(upload_to=recipe_ingredient_image_upload_handler)  # path/to/location/of/image
 
 
 class RecipeIngredient(models.Model):
