@@ -1,5 +1,11 @@
 from django import forms
-from .models import Article
+from .models import Article, ArticleImage
+
+
+class ArticleImageForm(forms.ModelForm):
+    class Meta:
+        model = ArticleImage
+        fields = ['image']
 
 
 class ArticleForm(forms.ModelForm):

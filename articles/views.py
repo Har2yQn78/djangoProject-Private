@@ -1,7 +1,7 @@
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect
 from django.http import Http404
-from .forms import ArticleForm
+from .forms import ArticleForm, ArticleImageForm
 from .models import Article
 
 
@@ -46,3 +46,18 @@ def article_detail_view(request, slug=None):
         "object": article_obj,
     }
     return render(request, "articles/detail.html", context=context)
+
+
+def article_image_upload_view(request, parent_id=None):
+    try:
+        parent_obj = Article.objects.get(id=parent_id, user=request.user)
+    except:
+        parent_obj = None
+    if parent_obj is None:
+        raise Http404
+    form = ArticleImageForm(request.POST or None, request.FILES or None)
+    if form.is_valid():
+        obj = form.save(commit=False)
+        obj.article = parent_obj 
+        obj.save()
+    return render(request, "image-form.html", {"form": form})

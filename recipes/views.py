@@ -4,7 +4,7 @@ from django.forms.models import modelformset_factory  # model form for query_set
 from .models import Recipe, RecipeIngredient
 from django.http import HttpResponse, Http404
 from django.contrib.auth.decorators import login_required
-from .forms import RecipeForm, RecipeIngredientForm
+from .forms import RecipeForm, RecipeIngredientForm, RecipeIngredientImageForm
 from django.urls import reverse
 
 
@@ -56,7 +56,7 @@ def recipe_delete_view(request, id=None):
 @login_required
 def recipe_ingredient_delete_view(request, parent_id=None, id=None):
     try:
-        obj = RecipeIngredient.object.get(recipe__id=parent_id,  id=id, recipe__user=request.user)
+        obj = RecipeIngredient.object.get(recipe__id=parent_id, id=id, recipe__user=request.user)
     except:
         obj = None
     if obj is None:
@@ -168,3 +168,18 @@ def recipe_ingredient_update_hx_view(request, parent_id=None, id=None):
         return render(request, "recipes/partials/ingredient-inline.html", context)
 
     return render(request, "recipes/partials/ingredient-form.html", context)
+
+
+def recipe_ingredient_image_upload_view(request, parent_id=None):
+    try:
+        parent_obj = Recipe.object.get(id=parent_id, user=request.user)
+    except:
+        parent_obj = None
+    if parent_obj is None:
+        raise Http404
+    form = RecipeIngredientImageForm(request.POST or None, request.FILES or None)
+    if form.is_valid():
+        obj = form.save(commit=False)
+        obj.recipe = parent_obj
+        obj.save()
+    return render(request, "image-form.html", {"form": form})
