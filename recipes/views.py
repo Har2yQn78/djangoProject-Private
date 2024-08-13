@@ -6,6 +6,7 @@ from django.http import HttpResponse, Http404
 from django.contrib.auth.decorators import login_required
 from .forms import RecipeForm, RecipeIngredientForm, RecipeIngredientImageForm
 from django.urls import reverse
+from .services import extract_text_via_ocr_service
 
 
 # Create your views here.
@@ -185,4 +186,5 @@ def recipe_ingredient_image_upload_view(request, parent_id=None):
         obj = form.save(commit=False)
         obj.recipe = parent_obj
         obj.save()
+        result = extract_text_via_ocr_service(obj.image)
     return render(request, template_name, {"form": form})

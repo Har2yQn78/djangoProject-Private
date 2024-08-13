@@ -49,9 +49,6 @@ def article_detail_view(request, slug=None):
 
 
 def article_image_upload_view(request, parent_id=None):
-    template_name = "articles/image-article-upload-form.html"
-    if request.htmx:
-        template_name = "articles/image-article-upload.html"
     try:
         parent_obj = Article.objects.get(id=parent_id, user=request.user)
     except:
@@ -63,4 +60,5 @@ def article_image_upload_view(request, parent_id=None):
         obj = form.save(commit=False)
         obj.article = parent_obj
         obj.save()
-    return render(request, template_name, {"form": form})
+    return render(request, 'image-form.html', {"form": form})
+
