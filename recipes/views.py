@@ -1,19 +1,23 @@
-import requests
-from django.shortcuts import render, get_object_or_404, redirect
-from django.forms.models import modelformset_factory  # model form for query_sets
-from .models import Recipe, RecipeIngredient
-from django.http import HttpResponse, Http404
 from django.contrib.auth.decorators import login_required
-from .forms import RecipeForm, RecipeIngredientForm, RecipeIngredientImageForm
+from django.forms.models import modelformset_factory  # model form for querysets
 from django.urls import reverse
+from django.http import HttpResponse, Http404
+from django.shortcuts import redirect, render, get_object_or_404
+
+from .forms import RecipeForm, RecipeIngredientForm, RecipeIngredientImageForm
+from .models import Recipe, RecipeIngredient
 from .services import extract_text_via_ocr_service
+from .utils import (
+    convert_to_qty_units,
+    parse_paragraph_to_recipe_line
+)
 
 
-# Create your views here.
+# CRUD -> Create Retrieve Update & Delete
 
 @login_required
 def recipe_list_view(request):
-    qs = Recipe.object.filter(user=request.user)
+    qs = Recipe.objects.filter(user=request.user)
     context = {
         "object_list": qs
     }
@@ -32,7 +36,7 @@ def recipe_detail_view(request, id=None):
 @login_required
 def recipe_delete_view(request, id=None):
     try:
-        obj = Recipe.object.get(id=id, user=request.user)
+        obj = Recipe.objects.get(id=id, user=request.user)
     except:
         obj = None
     if obj is None:
@@ -55,9 +59,9 @@ def recipe_delete_view(request, id=None):
 
 
 @login_required
-def recipe_ingredient_delete_view(request, parent_id=None, id=None):
+def recipe_incredient_delete_view(request, parent_id=None, id=None):
     try:
-        obj = RecipeIngredient.object.get(recipe__id=parent_id, id=id, recipe__user=request.user)
+        obj = RecipeIngredient.objects.get(recipe__id=parent_id, id=id, recipe__user=request.user)
     except:
         obj = None
     if obj is None:
@@ -79,12 +83,14 @@ def recipe_ingredient_delete_view(request, parent_id=None, id=None):
 
 @login_required
 def recipe_detail_hx_view(request, id=None):
+    if not request.htmx:
+        raise Http404
     try:
-        obj = Recipe.object.get(id=id, user=request.user)
+        obj = Recipe.objects.get(id=id, user=request.user)
     except:
         obj = None
     if obj is None:
-        return HttpResponse("Not Found.")
+        return HttpResponse("Not found.")
     context = {
         "object": obj
     }
@@ -92,7 +98,7 @@ def recipe_detail_hx_view(request, id=None):
 
 
 @login_required
-def recipe_create_view(request, id=None):
+def recipe_create_view(request):
     form = RecipeForm(request.POST or None)
     context = {
         "form": form
@@ -107,11 +113,10 @@ def recipe_create_view(request, id=None):
             }
             return HttpResponse("Created", headers=headers)
             # context = {
-            #    "object": obj
+            #     "object": obj
             # }
-            # return render(request, "recipes/partials/detail.html", context)'''
+            # return render(request, "recipes/partials/detail.html", context)
         return redirect(obj.get_absolute_url())
-
     return render(request, "recipes/create-update.html", context)
 
 
@@ -127,8 +132,7 @@ def recipe_update_view(request, id=None):
     }
     if form.is_valid():
         form.save()
-        context['message'] = 'Data Saved.'
-
+        context['message'] = 'Data saved.'
     if request.htmx:
         return render(request, "recipes/partials/forms.html", context)
     return render(request, "recipes/create-update.html", context)
@@ -139,16 +143,15 @@ def recipe_ingredient_update_hx_view(request, parent_id=None, id=None):
     if not request.htmx:
         raise Http404
     try:
-        parent_obj = Recipe.object.get(id=parent_id, user=request.user)
+        parent_obj = Recipe.objects.get(id=parent_id, user=request.user)
     except:
         parent_obj = None
     if parent_obj is None:
-        return HttpResponse("Not Found.")
-
+        return HttpResponse("Not found.")
     instance = None
     if id is not None:
         try:
-            instance = RecipeIngredient.object.get(recpie=parent_obj, id=id)
+            instance = RecipeIngredient.objects.get(recipe=parent_obj, id=id)
         except:
             instance = None
     form = RecipeIngredientForm(request.POST or None, instance=instance)
@@ -167,7 +170,6 @@ def recipe_ingredient_update_hx_view(request, parent_id=None, id=None):
         new_obj.save()
         context['object'] = new_obj
         return render(request, "recipes/partials/ingredient-inline.html", context)
-
     return render(request, "recipes/partials/ingredient-form.html", context)
 
 

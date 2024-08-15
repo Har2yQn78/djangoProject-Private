@@ -1,17 +1,18 @@
-{% extends 'base.html' %}
+{% extends "base.html" %}
+
 
 {% block content %}
- {% if not request.user.is_authenticated %}
-    <div style="margin-top:30px;  ">
-        <form method="POST">
-        {% csrf_token %}
+
+{% if not request.user.is_authenticated %}
+    <div style='margin-top:30px;'>
+        <form method='POST'>{% csrf_token %}
             {{ form.as_p }}
-            <button type="sumbit">Register</button>
+            <button type='submit'>Register</button>
         </form>
-    <p>Already have an account?<a href="/login/">Click here</a> </p>
+        <p>Already have an account? Please <a href='/login'>Login</a></p>
     </div>
 {% else %}
-     <p style="color: goldenrod">You're already logged in and can not register. Would you like to <a href="/logout/">logout</a>?</p>
- {% endif %}
+<p>You're already logged in and cannot register. Would you like to <a href='/logout/'>logout</a>?</p>
+{% endif %}
 
 {% endblock %}

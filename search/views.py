@@ -1,12 +1,15 @@
 from django.shortcuts import render
+
 from articles.models import Article
 from recipes.models import Recipe
 
+
 SEARCH_TYPE_MAPPING = {
-    'article': Article,
     'articles': Article,
+    'article': Article,
     'recipe': Recipe,
     'recipes': Recipe,
+
 }
 
 
@@ -20,8 +23,8 @@ def search_view(request):
     context = {
         "queryset": qs
     }
-    template = "search/result-view.html"
+    template = "search/results-view.html"
     if request.htmx:
         context['queryset'] = qs[:5]
-        template = "search/partials/result.html"
+        template = "search/partials/results.html"
     return render(request, template, context)

@@ -1,25 +1,22 @@
-import pathlib
-import uuid
 from django.conf import settings
 from django.db import models
 from django.db.models import Q
 from django.db.models.signals import pre_save, post_save
-from django.utils import timezone
 from django.urls import reverse
+from django.utils import timezone
+# Create your models here.
 
 from .utils import slugify_instance_title
 
 User = settings.AUTH_USER_MODEL
 
 
-# Create your models here.
-
 class ArticleQuerySet(models.QuerySet):
     def search(self, query=None):
         if query is None or query == "":
             return self.none()
-        lookup = Q(title__icontains=query) | Q(content__icontains=query)
-        return self.filter(lookup)
+        lookups = Q(title__icontains=query) | Q(content__icontains=query)
+        return self.filter(lookups)
 
 
 class ArticleManager(models.Manager):
@@ -30,11 +27,12 @@ class ArticleManager(models.Manager):
         return self.get_queryset().search(query=query)
 
 
-
 class Article(models.Model):
+    # https://docs.djangoproject.com/en/3.2/ref/models/fields/#model-field-types
+    # Django model-field-types
     user = models.ForeignKey(User, blank=True, null=True, on_delete=models.SET_NULL)
     title = models.CharField(max_length=120)
-    slug = models.SlugField(unique=True, null=True, blank=True)
+    slug = models.SlugField(unique=True, blank=True, null=True)
     content = models.TextField()
     timestamp = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
@@ -48,20 +46,24 @@ class Article(models.Model):
 
     def get_absolute_url(self):
         # return f'/articles/{self.slug}/'
-        return reverse('articles:detail', kwargs={'slug': self.slug})
+        return reverse("articles:detail", kwargs={"slug": self.slug})
 
     def save(self, *args, **kwargs):
+        # obj = Article.objects.get(id=1)
+        # set something
         # if self.slug is None:
-        # self.slug = slugify(self.title)
+        #     self.slug = slugify(self.title)
         # if self.slug is None:
-        # instance = slugify_instance_title(self, save=False)
+        #     slugify_instance_title(self, save=False)
         super().save(*args, **kwargs)
+        # obj.save()
+        # do another something
 
 
 def article_pre_save(sender, instance, *args, **kwargs):
     # print('pre_save')
     if instance.slug is None:
-        instance = slugify_instance_title(instance, save=False)
+        slugify_instance_title(instance, save=False)
 
 
 pre_save.connect(article_pre_save, sender=Article)
@@ -70,19 +72,7 @@ pre_save.connect(article_pre_save, sender=Article)
 def article_post_save(sender, instance, created, *args, **kwargs):
     # print('post_save')
     if created:
-        instance = slugify_instance_title(instance, save=True)
+        slugify_instance_title(instance, save=True)
 
 
 post_save.connect(article_post_save, sender=Article)
-
-
-def article_image_upload_handler(instance, filename):
-    fpath = pathlib.Path(filename)
-    new_fname = str(uuid.uuid1())  # uuid1 -> uuid + timestamp
-    return f"articles/{new_fname}{fpath.suffix}"  # suffix -> .png/.jpg/.jpeg
-
-
-class ArticleImage(models.Model):
-    recipe = models.ForeignKey(Article, on_delete=models.CASCADE)
-    image = models.ImageField(upload_to=article_image_upload_handler)  # path/to/location/of/image
-

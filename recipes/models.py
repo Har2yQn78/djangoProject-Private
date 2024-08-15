@@ -1,24 +1,36 @@
 import pathlib
 import pint
 import uuid
+
 from django.conf import settings
 from django.db import models
+from django.db.models import Q
+from django.urls import reverse
 from .utils import number_str_to_float
 from .validators import validate_unit_of_measure
-from django.urls import reverse
-from django.db.models import Q
+
+"""
+- Global
+    - Ingredients
+    - Recipes
+- User
+    - Ingredients
+    - Recipes
+        - Ingredients
+        - Directions for Ingredients
+"""
 
 
 class RecipeQuerySet(models.QuerySet):
     def search(self, query=None):
         if query is None or query == "":
             return self.none()
-        lookup = (
+        lookups = (
                 Q(name__icontains=query) |
                 Q(description__icontains=query) |
                 Q(directions__icontains=query)
         )
-        return self.filter(lookup)
+        return self.filter(lookups)
 
 
 class RecipeManager(models.Manager):
@@ -38,7 +50,7 @@ class Recipe(models.Model):
     updated = models.DateTimeField(auto_now=True)
     active = models.BooleanField(default=True)
 
-    object = RecipeManager()
+    objects = RecipeManager()
 
     @property
     def title(self):
@@ -56,28 +68,37 @@ class Recipe(models.Model):
     def get_delete_url(self):
         return reverse("recipes:delete", kwargs={"id": self.id})
 
-    def get_ingredient_children(self):
+    def get_ingredients_children(self):
         return self.recipeingredient_set.all()
+
+    def get_image_upload_url(self):
+        return reverse("recipes:recipe-ingredient-image-upload", kwargs={"parent_id": self.id})
 
 
 def recipe_ingredient_image_upload_handler(instance, filename):
     fpath = pathlib.Path(filename)
-    new_fname = str(uuid.uuid1())  # uuid1 -> uuid + timestamp
-    return f"recipes/{new_fname}{fpath.suffix}"  # suffix -> .png/.jpg/.jpeg
+    new_fname = str(uuid.uuid1())  # uuid1 -> uuid + timestamps
+    return f"recipes/ingredient/{new_fname}{fpath.suffix}"
 
 
 class RecipeIngredientImage(models.Model):
     recipe = models.ForeignKey(Recipe, on_delete=models.CASCADE)
-    image = models.ImageField(upload_to=recipe_ingredient_image_upload_handler)  # path/to/location/of/image
+    image = models.ImageField(upload_to=recipe_ingredient_image_upload_handler)  # path/to/the/actual/file.png
+    extracted = models.JSONField(blank=True, null=True)
+
+    # image
+    # extracted_text
 
 
 class RecipeIngredient(models.Model):
     recipe = models.ForeignKey(Recipe, on_delete=models.CASCADE)
+    # recipe_id = models.AutoField -> ID to Recipe
     name = models.CharField(max_length=220)
     description = models.TextField(blank=True, null=True)
-    quantity = models.CharField(max_length=50)
+    quantity = models.CharField(max_length=50, blank=True, null=True)  # 1 1/4
     quantity_as_float = models.FloatField(blank=True, null=True)
-    unit = models.CharField(max_length=50, validators=[validate_unit_of_measure])
+    # pounds, lbs, oz, gram, etc
+    unit = models.CharField(max_length=50, validators=[validate_unit_of_measure], blank=True, null=True)
     directions = models.TextField(blank=True, null=True)
     timestamp = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
@@ -100,20 +121,22 @@ class RecipeIngredient(models.Model):
         }
         return reverse("recipes:hx-ingredient-detail", kwargs=kwargs)
 
-    def convert_to_system(self, system='mks'):
-        if self.quantity_as_float is not None:
-            return ""
+    def convert_to_system(self, system="mks"):
+        if self.quantity_as_float is None:
+            return None
         ureg = pint.UnitRegistry(system=system)
-        measurement = self.quantity_as_float * ureg[self.unit]
+        measurement = self.quantity_as_float * ureg[self.unit.lower()]
         return measurement  # .to_base_units()
 
-    def as_mks(self):  # meter,kilogram,second
+    def as_mks(self):
+        # meter, kilogram, second
         measurement = self.convert_to_system(system='mks')
-        return measurement.to_base_unit()
+        return measurement.to_base_units()
 
-    def as_imperial(self):  # miles, pounds, second
+    def as_imperial(self):
+        # miles, pounds, seconds
         measurement = self.convert_to_system(system='imperial')
-        return measurement.to_base_unit()
+        return measurement.to_base_units()
 
     def save(self, *args, **kwargs):
         qty = self.quantity
@@ -125,4 +148,4 @@ class RecipeIngredient(models.Model):
         super().save(*args, **kwargs)
 
 # class RecipeImage():
-# recipe = models.ForeignKey(Recipe)
+#     recipe = models.ForeignKey(Recipe)

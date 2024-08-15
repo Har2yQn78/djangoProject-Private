@@ -1,14 +1,13 @@
 {% extends "base.html" %}
 
 {% block content %}
-    <h1><a href="https://github.com/Har2yQn78">My Github profile</a></h1>
-<h2>My Recipes</h2>
-
-
-<a href="{% url "recipes:create" %}">Add Recipe</a>
-
-    <ul>{% for x in object_list %}
-            <li><a href='{{ x.get_absolute_url }}'> {{ x.name }}</a></li>
+<h1>My Recipes</h1>
+<h3><a href='{% url "recipes:create" %}'>Add Recipe</a></h3>
+<hr/>
+{% for x in object_list %}
+        <div class='mb-3'>
+            <a class='lead' href='{{ x.get_absolute_url }}'>{{ x.name }}</a>
+    </div>
     {% endfor %}
-    </ul>
+
 {% endblock content %}

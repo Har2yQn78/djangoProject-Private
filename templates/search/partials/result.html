@@ -1,13 +1,12 @@
-Search for {{ request.GET.q }} under {{ request.GET.type|lower }}s
-{% for object in quesryset %}
+Searched for {{ request.GET.q }} under {{ request.GET.type|title }}s
+{% for object in queryset %}
     <li><a href="{{ object.get_absolute_url }}">{{ object.name }}</a></li>
+{% empty %}
 
-    {% empty %}
-    <li>No Result Found</li>
+<li>No results found</li>
 
-{% endfor %}
+ {% endfor %}
 
-{% if request.htmx %}
-
-<a href="/search/?q={{ request.GET.q }}&type={{ request.GET.type }} ">View All</a>
-{% endif %}
+ {% if request.htmx %}
+<a href='/search/?q={{ request.GET.q }}&type={{ request.GET.type }}'>View All</a>
+ {% endif %}
